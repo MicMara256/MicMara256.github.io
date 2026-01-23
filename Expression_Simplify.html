@@ -320,8 +320,8 @@
                         }
                     }
                 } else {//Throw an error, I guessz:
-                    console.log("Error. This program can't do non-numbers in exponents. Sorry. Try using logarithms, or to call that a separate variable and reenter it. Or you could check out https://en.wikipedia.org/wiki/Exponential_function. Whatever problem you're working on, good luck. Also, espicially good luck for you, desperate enough to look in the console for help. What's wrong with the site, by the way?.")
-                    return "Error. This program can't do non-numbers in exponents. Sorry. Try using logarithms, or to call that a separate variable and reenter it. Or you could check out <a href=https://en.wikipedia.org/wiki/Exponential_function>https://en.wikipedia.org/wiki/Exponential_function</a>. Whatever problem you're working on, good luck."
+                    console.log("Error. This program can't do non-numbers in exponents. Sorry. Try using logarithms, or to call that a separate variable and reenter it. Or you could check out https://en.wikipedia.org/wiki/Exponential_function. Whatever problem you're working on, good luck. Also, espicially good luck for you, desperate enough to look in the console for help. What's wrong with the site, by the way?")
+                    return "Error. This program can't do non-numbers in exponents. Sorry. Try using logarithms, or to call that a separate variable and reenter it. Or you could check out https://en.wikipedia.org/wiki/Exponential_function. Whatever problem you're working on, good luck."
                 }
             }
             while((input.includes("*") || input.includes("/")) && !(inputbefore===input)) {
@@ -357,12 +357,20 @@
                 //need combine like terms here.
                 // //I COULD do have terms be ["*", #, "i"(if Applicable), ]
                 //fractions will be ["/",["*"...],["*"...]]
+
             
             }
         }
     }
     function numberI(inp) {
         return (inp==="i" || typeof(inp)==="number")
+    }
+    function reorder(input) {
+        output = []
+        if(input[0]="*") {
+            output.push("*")
+            input.shift()
+        }
     }
 
 </script>
