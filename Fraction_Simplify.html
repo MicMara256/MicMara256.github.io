@@ -1,0 +1,126 @@
+<html>
+    <body>
+        <p>Simplifed fraction calculator!<br></p>
+        <p>Suppprts complex numbers in both the numerator and denominator</p>
+        <p>Use the calculator!</p><input type="button" id="Fraction" value="Click me to simplify a fraction!" onclick="simpleFractionsUser()">
+    </body>
+</html>
+<script>
+    function simpleFractionsUser() {
+        //var num = prompt("Please enter the numerator of the fraction you would like to simplify!");
+        //var den = prompt("Please enter the denominator of the fraction you would like to simplify!");
+        
+        var input = prompt("Please enter the fraction!")
+        p = document.createElement("p")
+
+        if(!input.includes("/")) {
+            p.innerHTML = "The simplest form of " + input + " is " + input +"!"
+            document.body.appendChild(p);
+            return;
+        }
+        var frac1 = input.split("/")
+
+        var num = frac1[0]
+        var den = frac1[1]
+        var positive = true
+        
+        if(num.includes("i") || den.includes("i")) {
+            num = num.split("+");
+            den = den.split("+");
+            var numR = 0
+            var numI = 0
+            var denR = 0
+            var denI = 0
+
+            for(let i = 0; i < num.length(); i++) {
+                if(num[i].includes("i")) {numI += num[i].substring(0, num[i].length - 1);}
+                else numR += num[i]
+            }
+            
+            
+            for(let i = 0; i < den.length(); i++) {
+                if(den[i].includes("i")) {denI += den[i].substring(0, den[i].length - 1);}
+                else denR += den[i]
+            }
+
+            var simple = Fraction_Simplify_Complex(numR,numI,denR,denI)
+            p.innerHTML = "The simplest form of " + frac1[0] + "/" + frac1[1] + " is " + simple[0][0] +"/"+ simple[0][1] + " + " + simple[1][0] + "/" + simple[1][1] + "i!"
+            document.body.appendChild(p)
+            return;
+        }
+        
+        if(den == 0) {
+            p.innerHTML = num + "/" + den + " is a #DIV/0!"
+            document.body.appendChild(p);
+            return;
+        }
+        
+        if(num < 0) {
+            num = num * -1;
+            positive = !positive
+        }
+        
+        if(den < 0) {
+            den = den * -1;
+            positive = !positive
+        }
+
+
+        var frac = simpleFractions(num, den);
+        if(frac[1] == 1) {
+            if(positive) {
+                p.innerHTML = "Congrats! The simplest form of " + frac1[0] + "/" + frac1[1] + " came out to be an integer, and that integer is " + frac[0] +"!"
+                document.body.appendChild(p);
+                return;
+            } else {
+                p.innerHTML = "Congrats! The simplest form of " + frac1[0] + "/" + frac1[1] + " came out to be an integer, and that integer is -" + frac[0] +"!"
+                document.body.appendChild(p);
+                return;
+            }
+        }
+        if(positive) {
+            p.innerHTML = "The simplest form of " + frac1[0] + "/" + frac1[1] + " is " + frac[0] + "/" + frac[1] + "!";
+            document.body.appendChild(p);
+            return;
+        } else {
+            p.innerHTML = "The simplest form of " + frac1[0] + "/" + frac1[1] + " is -" + frac[0] + "/" + frac[1] + "!";
+            document.body.appendChild(p);
+            return;
+        }
+    }
+    
+    function simpleFractions(num, den) {
+        var div = gcd(num,den);
+        num = num/div;
+        den = den/div;
+        return([num,den]);
+    }
+
+    /*
+    function gcd(a,b) {
+    a = Math.abs(a);
+    b = Math.abs(b);
+    if (b > a) {var temp = a; a = b; b = temp;}
+        while (true) {
+            if (b == 0) return a;
+            a %= b;
+            if (a == 0) return b;
+            b %= a;
+        }
+    }
+    */
+    
+    function gcd(a,b) {
+        if(b > a) {return gcd(b,a)}
+        if(b==a) {return(a)}
+        //Now we know that a > b
+        var x = Math.floor(a/b);
+        var r = a - (b*x)
+        if(r == 0) {return b}
+        return gcd(b,r)
+    }
+
+    function Fraction_Simplify_Complex(a,b,c,d) {
+        return [simpleFractions((a*c)+(b*d),(c*c)+(d*d)),simpleFractions((b*c)-(a*d),(c*c)+(d*d))];
+    }
+</script>

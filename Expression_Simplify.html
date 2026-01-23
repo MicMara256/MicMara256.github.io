@@ -1,0 +1,368 @@
+<html>
+    <body>
+        <p>This webpage takes infix notation and turns it into Reverse Polish Notation!</p>
+        <input type="button" id="simple" value="Enter your infix!" onclick="getIn()">
+    </body>
+</html>
+<script>
+    /*
+    THIS COMMENT IS OBSOLETE-ish
+    All latin characters, [a, b, ... z] and [A, B, ... Z] are interpreted as variables, except for "i" which is the sqrt(-1), e, the base of natural logarithms, and the group pi or PI, 3.141592...
+    Main node types: "#" ([... -2, -1, 0, 1, 2, ...]) "+" "-" (interpreted as adding a negative) "*" "/" "Var" (above) "i" "^" "sqrt()"   
+    Extra node types: ln(), e^x, cos(), sin(), tan(), ^-1s, both ways. "^" nth root (^1/n?) log_n() (lns)
+    Extra Extra: mod, floor, ciel, round, hypertrig
+    
+
+    THIS IS OBSOLETE
+    Raw structure:
+    [a,
+        [b],
+        [6,
+            [g],
+            [i+4,
+                [1],
+                [2],
+                [3],
+                [4],
+            ]
+        ]
+    ]
+    */
+    function getIn() {
+        var input = prompt("Please enter your infix!")
+        p = document.createElement("p")
+        output = simplify2(tokenize(input))
+        p.innerHTML = output;
+        document.body.appendChild(p)
+    }
+    function tokenize(input) {
+        console.log("input:")
+        console.log(input)
+        input = input.split("")
+        console.log("input as array:")
+        console.log(input)
+        var output = []
+        var digits = ["0","1","2","3","4","5","6","7","8","9"]
+        var add = ""
+        var functions = ["sqrt"] //also need to figure this out.
+        var addArray = []
+        var variables =  ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
+        var constants = ["pi","PI","tau","TAU","phi","PHI"]
+        var operations = ["+","-","*","/","^"]
+        var parentheses = 0
+
+        while(input.length!=0) {
+            if(digits.includes(input[0])) { //switched from contains to includes
+                add = ""
+                while(digits.includes(input[0])) {
+                    add = add + input[0]
+                    input.shift()
+                }
+                if(output[output.length-1] === ")" || variables.includes(output[output.length-1]) || constants.includes(output[output.length-1])) {output.push("*")}
+                add = Number(add)
+                output.push(add)
+            } //else {
+                /*
+                for(i = 0; i < functions.length(); i++) {
+                    addArray = input.slice(0,functions[i].length)
+                    if(addArray.join("") === functions[i]) {
+                        output.push(addArray.join(""))
+                        for(let j =0; j <functions[i].length; j++) {
+                            input.shift();
+                        }
+                    }
+                }
+                */
+            //}
+            else if ((input[0] === "p" && input[1] === "i" )||(input[0] === "P" && input[1] === "I" )) {
+                
+                if(typeof(output[output.length-1])==="number" || output[output.length-1] === ")" || variables.includes(output[output.length-1]) || constants.includes(output[output.length-1])) {
+                    output.push("*")
+                }
+
+
+                output.push("pi")
+                input.shift(); input.shift();
+            } else if ((input[0] === "t" && input[1] === "a" && input[2] === "u")||(input[0] === "T" && input[1] === "A" && input[2] === "U")) { 
+                if(typeof(output[output.length-1])==="number" || output[output.length-1] === ")" || variables.includes(output[output.length-1]) || constants.includes(output[output.length-1])) {
+                    output.push("*")
+                }
+                output.push("(")
+                output.push(2)
+                output.push("*")
+                output.push("pi")
+                output.push(")")
+                input.shift()
+                input.shift()
+                input.shift()
+            } else if(variables.includes(input[0])) {
+                if(typeof(output[output.length-1])==="number" || output[output.length-1] === ")" || variables.includes(output[output.length-1]) || constants.includes(output[output.length-1])) {
+                    output.push("*")
+                }
+                output.push(input[0])
+                input.shift()
+            } else if(input[0] === "-" ) {
+                if(output.length===0 || (output[output.length-1]==="(") || (output[output.length-1]==="/") || (output[output.length-1]==="*") || (output[output.length-1]==="^")) {
+                    //Do not add a plus!
+                } else { //there is a plus, minus, number, variable, or end parentheses these we can add to.
+                    output.push("+")
+                }
+                output.push(-1)
+                input.shift()
+            } else if(operations.includes(input[0])) { // FIXED ABOVE Shunting Yard is right-assosciative. Only messes up subtraction
+                output.push(input[0])
+                input.shift()
+            } else if (input[0] === "(") {
+                if (typeof(output[output.length-1])==="number" ||
+                    output[output.length-1] === ")" ||
+                    variables.includes(output[output.length-1]) ||
+                    constants.includes(output.length-1))
+                {
+                    output.push("*")
+                }
+                output.push("(");
+                input.shift()
+                parentheses += 1
+            } else if (input[0] === ")") {
+                output.push(")")
+                input.shift()
+                parentheses -= 1
+            } 
+            console.log("Along the way:")
+            console.log(output)
+        }
+
+        if(parentheses > 0) {
+            for(let i = 0; i < parentheses; i++) {
+                output.push(")")
+            }
+        } else if(parentheses < 0) {
+            for(let i = 0; i > parentheses; i--) { //reversed because limit is negative
+                output.unshift("(")
+            }
+        }
+        console.log("output:");
+        console.log(output);
+        return output
+    }
+    function shuntingYard(input) {
+        //Converts the input from infix to postfix (Reverse Polish) notation
+        //DONE //IMPORTANT //RIGHT ASSOSIATIVE OHNO OHNO OHNO OHNO OHNO OHNO OHNO OHNO OHNO OHNO OHNO OHNO OHNO
+        var output = []
+        var stack = []
+        var current;
+        var operations = ["+","-","*","/","^"]
+        var precedence = [ 1 , 1 , 2 , 2 , 3 ]
+        var associative =["l","l","l","l","r"]
+        var variables =  ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z","pi"]
+        var functions = ["sqrt"]
+        var top = 0
+
+        //input = [2, "+", 4]
+        input.reverse(); //[4,"+",2]
+        while(input.length != 0) {
+            current = input.pop()
+            if(variables.includes(current) || typeof(current) === "number") {
+                output.push(current) //[2]
+//          } else if (functions.includes(current)) {
+//              stack.push(current);
+            } else if (operations.includes(current)) {
+                while(stack.length!=0 && //While there's an operator on the top of the stack 
+                    precedence[operations.indexOf(stack[stack.length-1])] //First precedence
+                    >
+                    precedence[operations.indexOf(current)]
+                ) { 
+                    output.push(stack.pop())
+                }
+                stack.push(current);
+            } else if(current === "(") {
+                stack.push(current)
+            } else if(current === ")") {
+                while(stack[stack.length-1] != "(") {
+                    output.push(stack.pop())
+                }
+                stack.pop()
+            }
+        }
+        while(stack.length != 0) {
+            output.push(stack.pop())
+        }
+        
+        return(output)
+
+    }
+    function simplify(input) {
+        var variables =  ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z","pi"]
+        let arithmetic = ["+","-","*","^"]
+        let foundArithmetic = true //assume there is arithmetic
+        while(foundArithmetic === true) { //if we found anything, keep looking (1,2,3,+,+ needs two)
+            //Can we do addition, subtraction, multiplication, or exponentiation?
+            
+            foundArithmetic = false
+            for(let i = 0; i < input.length; i++) {
+                if(typeof(input[i]) === "number" && typeof(input[i+1]) === "number" && arithmetic.includes(input[i+2])) {
+                    foundArithmetic = true
+                    if(input[i+2] = "+") {
+                        input.splice(i,3,input[i]+input[i+1])
+
+                    } else if (input[i+2] = "-") {
+                        input.splice(i,3,input[i]-input[i+1])
+
+                    } else if (input[i+2] = "*") {
+                        input.splice(i,3,input[i]*input[i+1])
+
+                    } else if (input[i+2] = "^") {
+                        input.splice(i,3,input[i]^input[i+1])
+                    }
+                } else if(input[i] === "i" && ((input[i+1] === "i" && input[i+2] === "*" ) || (input[i+1] === 2 && input[i+2] === "^"))) {
+                    foundArithmetic = true
+                    input.splice(i,3,-1)
+                }
+            
+            }
+        }
+        let times = []
+        let plus =  []
+        let plustimes = 1
+        let count = false
+        var termstart
+        if(!input.includes("/") && !input.includes("^")) { //No division is easier for learn //also no ^
+            for(let i = 0; i < input.length; i++) { //get where plus and times are
+                if(input[i] === "+") {
+                    plus.push(i)
+                } else if (input[i] === "*") {
+                    times.push(i)
+                }
+            }
+            //Check what term each thing is in
+                //Start at the end of the list (in RPN) and move backwards
+                //If we find a times, then
+            for(let i = input.length-1; i >= 0; i--) {
+                if(input[i]==="*") {
+                    //go back, counting plus and times.
+                    count = true
+                    termstart === i
+                }
+                if(count === true) {
+                    if(input[i]==="+" || input[i]==="*") {
+                        plustimes++
+                    }
+                    if(variables.inludes(input[i]) || typeof(input[i]==="number")) {
+                        plustimes--
+                    }
+                }
+                if(plustimes===0) {
+                    //one term is over!
+                    //what could it  be?
+                    //abc...n**...* Do: nothing
+                    //abc+* Do: distribute
+                    //ab+c* Do: distribute
+                    //RECURSION! go into the tree, simplify and come back out!
+
+                }
+            }
+
+        }
+    }
+    function simplify2(input) { //Maybe try the infix
+        //search for parentheticals and do them first
+        //The only case of latent parentheticals will be multiplication.
+        if(input.includes("(")) {
+            var spot = input.indexOf("(")
+            for(let i = spot; i < input.length; i++) {
+                if(input[i] === ")") /*We found it!*/ {
+                    input.splice(spot+1,i-spot-1,simplify2(input.slice(spot+1,i))) //0123456789
+                    // figuring splice out                                             ^    ^
+                }
+            }
+        } else { //There is no parentheticals that we have to worry about
+            //Look for ^ (Do we really neeed to?)
+            var exponent
+            var base
+            var put = []
+            var put2 = ["*"]
+            var inputbefore = input
+            var times
+            while(input.includes("^")){
+                spot = input.lastIndexOf("^")
+                //We can only do sutff with integer powers. If the power is negative, it is one over whatever.
+                //Whatever is compute if a number, or x*x*...*x if other.
+                exponent = input[spot+1]
+                base = input[spot-1]
+                if(typeof(exponent)==="number" && floor(exponent)===exponent) { //if the ^x x is integer
+                    //compute the array to put in if it is not a number. This will use the [*, things to multiply] format
+                    if(Math.sign(exponent)===-1){
+                        put.push("/")
+                    } else {
+                        ;
+                    }
+                    for(let i = 0; i < Math.abs(exponent); i++) {
+                        put2.push(base)
+                    }
+                    if(Math.sign(exponent)===-1) {
+                        put.push(1)
+                        put.push(put)
+                    } else {
+                        put = put2
+                    }
+                    
+                    if(Math.sign(exponent)===-1) {
+                        if(typeof(base)==="number") {
+                            input.splice(i-1,3,1,"/",base)
+                        } else {
+                            input.splice(i-1,3,1,put) //Maybe division should be less priority then addition.
+                        }
+                    } else {
+                        if(typeof(base)==="number") {
+                            input.splice(i-1,3,base^exponent)
+                        } else {
+                            input.splice(i-1,3,put)
+                        }
+                    }
+                } else {//Throw an error, I guessz:
+                    console.log("Error. This program can't do non-numbers in exponents. Sorry. Try using logarithms, or to call that a separate variable and reenter it. Or you could check out https://en.wikipedia.org/wiki/Exponential_function. Whatever problem you're working on, good luck. Also, espicially good luck for you, desperate enough to look in the console for help. What's wrong with the site, by the way?.")
+                    return "Error. This program can't do non-numbers in exponents. Sorry. Try using logarithms, or to call that a separate variable and reenter it. Or you could check out <a href=https://en.wikipedia.org/wiki/Exponential_function>https://en.wikipedia.org/wiki/Exponential_function</a>. Whatever problem you're working on, good luck."
+                }
+            }
+            while((input.includes("*") || input.includes("/")) && !(inputbefore===input)) {
+                inputbefore = input
+                spot = Math.min(input.indexOf("*"),input.indexOf("/"))
+                times = input[spot]==="*"
+                if(typeof(input[spot-1])==="number" && typeof(input[spot+1])==="number") { //if they are numbers
+                    if(times) {
+                        input.splice(spot-1,3,input[spot-1]*input[spot+1]) //just multiply them
+                    } else {
+                        //if(floor(input[spot-1]/input[spot+1])===(input[spot-1]/input[spot+1])) { //If it is divisible integerialy,
+                        //    input.splice(spot-1,3,input[spot-1]/input[spot+1]) //or divide them
+                        //}
+                        input.splice(spot-1,3,input[spot-1]/input[spot+1]) //givig up on the fractions idea. Later MAYBE.
+                    }
+                } else if(input[spot-1]==="i"&&input[spot+1]==="i") {
+                    if(times) {
+                        input.splice(spot-1,3,-1)
+                    } else {
+                        input.splice(spot-1,3,1)
+                    }
+//              } else if(numberI(input[spot-1]) || numberI(input[spot+1])) {//not and, would have been caught, so If one of them is a nubmer.
+//                  if((numberI(input[spot+1])) && times) { //switch the things, we want numbers at the start.
+//                      input.splice(spot-1,3,input[spot+1],"*",input[spot-1])
+//                  }
+//              }
+                } else {}
+                if(inputbefore===input) {
+                    input = input.slice(0,spot+1).concat(simplify2(input.slice(spot+1)))
+                }
+            }
+            while(input.includes("+")) {
+                //need combine like terms here.
+                // //I COULD do have terms be ["*", #, "i"(if Applicable), ]
+                //fractions will be ["/",["*"...],["*"...]]
+            
+            }
+        }
+    }
+    function numberI(inp) {
+        return (inp==="i" || typeof(inp)==="number")
+    }
+
+</script>

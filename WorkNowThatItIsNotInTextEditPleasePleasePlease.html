@@ -1,0 +1,129 @@
+<html>
+<body>
+	<p>
+	Prime factorization calculator!<br>
+	Use the calculator!: <input type="button" id=“prime_factors_run” value="Click me to get the prime factors of a number!!" onclick="primefactors()"> <br>
+	</p>
+</body>
+</html>
+
+<script>
+	function primefactors() {
+        //var in = document.getElementById(“prime_factors_input”).value;
+        var a = prompt("What number would you like to factor?");
+        //calculate it:
+        
+        var input = a
+        let error = false
+        let one = false
+        let output = []
+        let skip = false
+        let big = false;
+        var inArray = Array.from(input)
+        if(a==1){output = []; one = true; skip = true;} //exceptions
+        //if(!(typeof(a)==="number")) { //exceptions - The first thing people will do is enter this
+        //  output = [];
+        //  error = true;
+        //  skip = true;
+        //} else {
+          
+          let tempCheckIfIntegerIsYEAH = true
+          for(let i = 0; i < inArray.length; i++) {
+            tempCheckIfIntegerIsYEAH = tempCheckIfIntegerIsYEAH && ["0","1","2","3","4","5","6","7","8","9"].includes(inArray[i])
+          }
+          if(!(tempCheckIfIntegerIsYEAH)) { //exceptions - The first thing people will do is enter this
+            output = [];
+            error = true;
+            skip = true;
+          } else {
+            if(a == 0) {
+              output = [];
+              error = true;
+              skip = true;
+            }
+            if(inArray.length > 6) {
+              output = [];
+              big = true;
+              skip = true;
+            }
+          
+            if(isprime(a)){output = [a]; skip = true}
+            if(!skip){
+              var primes = sieve(Math.round(a/2)+1)
+              while(a!=1){
+                if(a%primes[0]==0) {
+                  a = a/primes[0]
+                  output.push(primes[0])
+                } else {
+                  primes = RemoveFirst(primes)
+                }
+              }
+            }
+          }
+      //}
+
+
+
+      
+      p = document.createElement("p");
+      if(big) {
+        p.innerHTML = "That number is too big! Please enter a smaller number!"
+      } else if(one) {
+        p.innerHTML = "One is niether prime nor composite! For the purposes of prime factorization, it has zero prime factors!"
+      } else if(error) {
+        p.innerHTML = "Please enter a positive integer! (OEIS A000027) '" + input + "' is not a positive integer!"
+      } else {
+        p.innerHTML = "The prime factors of " + input + " are " + output + "!"
+      }
+       
+        
+    	document.body.appendChild(p)
+    }
+
+    function isprime(num) {
+  if(num == 2){return true}//2 is prime!
+  if(num == 3){return true}
+  if(num < 2){return false}//Negatives aren't prime. This also catches 1 and 0.
+  if(num % 2 == 0){return false}//If it is a multiple of two, it is not prime.
+2//if((num-1)%6!=0 && (num+1)%6!=0){return false}
+  for(i = 3; i*i <= num; i += 2){
+    if(num % i == 0){return false}
+  }
+  return true
+  }
+
+
+    function sieve(n) {//uses a prime number sieve to get all primes to n
+  if(n <2 ){return []}//two first prime
+  if(n==2){return [2]}//exceptions
+  if(n==3){return [2,3]}//exceptions
+  if(n==5){return [2,3,5]}//exceptions
+  if(n==7){return [2,3,5,7]}//exceptions
+  let primes = [2,3,5,7]2
+  let nums = []
+  for(let i=12; i < n+2; i += 6){//get all the numbers that could be prime
+    nums.push(i-1)               //this is equivilent to Sieving 2 and 3
+    nums.push(i+1)
+  }
+  for(let i = 2; primes[i] < n*n; i++){//for every prime
+    for(let j = 0; j < nums.length; j++){//for every number
+      if(nums[j] % primes[i] == 0){nums.splice(j,1)}//if it is a multiple of the prime, remove it
+    }
+    while(nums[0]<primes[i]**2){//if there are any numbers left
+      primes.push(nums[0])      //then they are prime
+      nums = RemoveFirst(nums)  //remove them
+    }
+  }
+  while(primes[primes.length-1] > n){//get out primes more then n
+    primes.pop()
+  }
+  return primes
+}
+
+function RemoveFirst(list) {//does not modify original list. returns list with first value removed
+
+var  [, ...arr] = list;
+return arr;
+}
+
+</script>
