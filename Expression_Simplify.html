@@ -289,6 +289,8 @@
                 //Whatever is compute if a number, or x*x*...*x if other.
                 exponent = input[spot+1]
                 base = input[spot-1]
+                put2 = ["*"]
+                put = []
                 if(typeof(exponent)==="number" && floor(exponent)===exponent) { //if the ^x x is integer
                     //compute the array to put in if it is not a number. This will use the [*, things to multiply] format
                     if(Math.sign(exponent)===-1){
@@ -348,14 +350,14 @@
 //                      input.splice(spot-1,3,input[spot+1],"*",input[spot-1])
 //                  }
 //              }
-                } else {}
+                } else {}//need to get in into form of [*] TODO
                 if(inputbefore===input) {
                     input = input.slice(0,spot+1).concat(simplify2(input.slice(spot+1)))
                 }
             }
             while(input.includes("+")) {
                 //need combine like terms here.
-                // //I COULD do have terms be ["*", #, "i"(if Applicable), ]
+                // //I COULD do have terms be ["*", #, "i"(if Applicable), ] // sould be ["*", Re, Im...]
                 //fractions will be ["/",["*"...],["*"...]]
 
             
@@ -367,10 +369,38 @@
     }
     function reorder(input) {
         output = []
-        if(input[0]="*") {
+        let I = FALSE
+        value = 1
+        if(input[0]==="*") {
             output.push("*")
             input.shift()
+
+            for(let i = input.length-1; i >= 0; i--) {
+                if(numberI(input[i])){
+                    if(input[i]==="i") {
+                        if(I===true) {value=-value}
+                        I = !I;
+                    } else { //its a number
+                        value = value*input[i]
+                    }
+                    //Remove it
+                    input.splice(i,1)
+                }
+            }
+            //Now it is just variables. Sort them.
+            input.sort()
+            output.push(value)
+            if(I){output.push("i")}else{"1"}
+            output.push(...input)
+            return output
+        } else if (input[0]==="/") {
+            return(["/", reorder(input[1]), reorder(input[2]) ])
         }
+        
+    }
+
+    function starReIm() {
+        
     }
 
 </script>
