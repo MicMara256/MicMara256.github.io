@@ -390,7 +390,7 @@
             //Now it is just variables. Sort them.
             input.sort()
             output.push(value)
-            if(I){output.push("i")}else{"1"}
+            if(I){output.push("i")}else{output.push(1)}
             output.push(...input)
             return output
         } else if (input[0]==="/") {
@@ -399,8 +399,21 @@
         
     }
 
-    function starReIm() {
-        
+    function starReIm(input) { //Re-order built in. 
+        if(input[0]==="*") {
+            input = reorder(input)
+            input[0] = "*ReIm"
+            if(input[2]===1) {
+                input[2] = 0;
+                return(input)
+            } else {
+                input[2] = input[1]
+                input[1] = 0;
+                return input;
+            }
+        } else {
+            return input
+        }
     }
 
 </script>
