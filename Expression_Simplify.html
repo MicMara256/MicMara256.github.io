@@ -429,9 +429,9 @@
                 if(input[i] === "+") {
                     ;
                 } else if(input[i]!=="+" && typeof(input[i]!=="object")) {
-                    input.splice(i,1,starReIm(["*",input[i]]))
+                    input.splice(i,1,starReIm(reorder(["*",input[i]])))
                 } else {
-                    input[i] = starReIm(input[i])
+                    input[i] = starReIm(reorder(input[i]))
                 }
             }
             var terms = []
