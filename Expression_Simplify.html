@@ -212,7 +212,7 @@
                         input.splice(i,3,input[i]*input[i+1])
 
                     } else if (input[i+2] = "^") {
-                        input.splice(i,3,input[i]^input[i+1])
+                        input.splice(i,3,input[i]**input[i+1])
                     }
                 } else if(input[i] === "i" && ((input[i+1] === "i" && input[i+2] === "*" ) || (input[i+1] === 2 && input[i+2] === "^"))) {
                     foundArithmetic = true
@@ -266,7 +266,7 @@
     }
     function simplify2(input) { //Maybe try the infix
         //search for parentheticals and do them first
-        //The only case of latent parentheticals will be multiplication.
+        //The only case of latent parentheticals will be multiplication and division. On either side. Or exponentiation.
         if(input.includes("(")) {
             var spot = input.indexOf("(")
             for(let i = spot; i < input.length; i++) {
@@ -351,7 +351,37 @@
 //                  }
 //              }
                 } else {//need to get in into form of [*]
-                    if(typeof(input[spot-1])==="object") {//one of the is the array.
+                    if(typeof(input[spot-1])==="object" && typeof(input[spot+1])==="object") {
+                        if(times) {                                                             //_*_
+                            if(input[spot-1][0]==="*"){                                         //**_
+                                if(input[spot+1][0]==="*") {                                    //***
+                                    input.splice(spot-1,3,["*",...input[spot-1].slice(1),...input[spot+1].slice(1)])
+                                } else {                                                        //**/
+                                    input.splice(spot-1,3,["/",["*",...input[spot-1].slice(1),...input[spot+1][1].slice(1)],input[spot+1][2]])
+                                }
+                            } else {                                                            ///*_
+                                if(input[spot+1][0]==="*") {                                    ///**
+                                    input.splice(spot-1,3,["/",["*",...input[spot+1].slice(1),...input[spot-1][1].slice(1)],input[spot-1][2]])
+                                } else {                                                        ///*/
+                                    input.splice(spot-1,3,["/",["*",...input[spot-1][1].slice(1),...input[spot+1][1].slice(1)],["*",...input[spot-1][2].slice(1),...input[spot+1][2].slice(1)]])
+                                }
+                            }
+                        } else {                                                                //_/_
+                            if(input[spot-1][0]==="*"){
+                                if(input[spot+1][0]==="*") {                                    //*/*
+                                    input.splice(spot-1,3,["/",input[spot-1],input[spot+1]])
+                                } else {                                                        //*// --> a/(b/c)-->ac/b
+                                    input.splice(spot-1,3,["/",["*",...input[spot-1].slice(1),...input[spot+1][2].slice(1)],input[spot+1][1]])
+                                }
+                            } else {
+                                if(input[spot+1][0]==="*") {                                    ////* --> (a/b)/c --> a/bc
+                                    input.splice(spot-1,3,["/",["*",input[spot-1][1],...input[spot-1][2].slice(1),...input[spot+1].slice(1)]])
+                                } else {                                                        ///// _. (a/b)/(c/d) --> (a/b)*(d/c) --> ad/bc
+                                    input.splice(spot-1,3,["/",["*",...input[spot-1][1].slice(1),...input[spot+1][2].slice(1),...input[spot-1][2].slice(1),...input[spot+1][1].slice(1)]])
+                                }
+                            }
+                        }
+                    } if(typeof(input[spot-1])==="object") {//one of the is the array.
                         if(times){
                             if(input[spot-1][0]==="*") {
                                 input[spot-1].push(input[spot+1])
@@ -366,6 +396,23 @@
                             } else { //already division
                                 input[spot-1][2].push(input[spot+1])
                                 input.splice(spot,2)
+                            }
+                        }
+                    } else if(typeof(input[spot+1])==="object") {
+                        if(times){
+                            if(input[spot+1][0]==="*") {
+                                input[spot+1].push(input[spot-1])
+                                input.splice(spot-1,2)
+                            } else {
+                                input[spot+1][0].push(input[spot-1])
+                                input.splice(spot-1,2)
+                            }
+                        } else {
+                            if(input[spot+1][0]==="*") { // turn into division
+                                input.splice(spot-1,3,["/",["*",input[spot-1]],input[spot+1]])
+                            } else { //already division
+                                input[spot+1][1].push(input[spot-1])
+                                input.splice(spot-1,2)
                             }
                         }
                     } else { // niether of them is an array
@@ -387,14 +434,31 @@
                     input[i] = starReIm(input[i])
                 }
             }
+            var terms = []
             while(input.includes("+")) {
                 //need combine like terms here.
                 // //I COULD do have terms be ["*", #, "i"(if Applicable), ] // sould be ["*", Re, Im...]
                 //fractions will be ["/",["*"...],["*"...]]
+                var term;
+                //get all the terms
+                for(let i = 0; i < input.length; i++) {
+                    term = input[i]
+                    if(term !== "+") {terms.push(term)}
+                }
 
+                //look for like terms (and combine them)
 
-                //look for like terms
-            
+                for(let i = 0; i < terms.length; i++) {
+                    for(let j = i+1; j < terms.length; j++) {
+                        if(terms[i].slice(3) === terms[j].slice(3)) {
+                            terms[i][1] += terms[j][1]
+                            terms[i][2] += terms[j][2]
+                            terms.splice(j,1)
+                            j--
+                        }
+                    }
+                }
+                //terms are now sorted.
             }
         }
     }
@@ -402,39 +466,41 @@
         return (inp==="i" || typeof(inp)==="number")
     }
     function reorder(input) {
-        output = []
-        let I = FALSE
-        value = 1
         if(input[0]==="*") {
-            output.push("*")
-            input.shift()
-
-            for(let i = input.length-1; i >= 0; i--) {
-                if(numberI(input[i])){
-                    if(input[i]==="i") {
-                        if(I===true) {value=-value}
-                        I = !I;
-                    } else { //its a number
-                        value = value*input[i]
-                    }
-                    //Remove it
-                    input.splice(i,1)
-                }
-            }
-            //Now it is just variables. Sort them.
-            input.sort()
-            output.push(value)
-            if(I){output.push("i")}else{output.push(1)}
-            output.push(...input)
-            return output
+            input = ["/", reordertimes(input),1]
         } else if (input[0]==="/") {
-            return(["/", reorder(input[1]), reorder(input[2]) ])
+            input =["/", reordertimes(input[1]), reordertimes(input[2])]
         }
-        
     }
-    function starReIm(input) { //Re-order built in. 
+    function reordertimes(input) {
+        var output = []
+        var I = FALSE
+        var value = 1
+        
+        output.push("*")
+        input.shift()
+        
+        for(let i = input.length-1; i >= 0; i--) {
+            if(numberI(input[i])){
+                if(input[i]==="i") {
+                    if(I===true) {value=-value}
+                    I = !I;
+                } else { //its a number
+                    value = value*input[i]
+                }
+                //Remove it
+                input.splice(i,1)
+            }
+        }
+        //Now it is just variables. Sort them.
+        input.sort()
+        output.push(value)
+        if(I){output.push("i")}else{output.push(1)}
+        output.push(...input)
+        return output
+    }
+    function starReIm(input) {
         if(input[0]==="*") {
-            input = reorder(input)
             input[0] = "*ReIm"
             if(input[2]===1) {
                 input[2] = 0;
@@ -445,9 +511,40 @@
                 return input;
             }
         } else {
-            input = reorder(input);
             input = ["/",starReIm(input[1]),starReIm(input[2])]
         }
+        //now we have it in division. Simplify the fraction.
+        for(let i = 3; i < ipnut[1].length; i++) {
+            for(let j = 3; j < input[2].length; j++) {
+                if(input[1][i]===input[1][j]) {
+                    //We cancel!
+                    input[1].splice(i,1)
+                    input[2].splice(j,1)
+                    j-- //so it doesn't move.
+                }
+            }
+        }
+        //simplify the numerator and denominators.
+        let a = input[1][1]
+        let b = input[1][2]
+        let x = input[2][1]
+        let y = input[2][2]
+        input[1].splice(1,2,a*x+b*y,b*x-a*y)
+        input[2].splice(1,2,x*x+y*y,0)
+        a = input[1][1]
+        b = input[1][2]
+        gcd(a,gcd(b,c))
+    }
+    function gcd(a,b) {
+    a = Math.abs(a);
+    b = Math.abs(b);
+    if (b > a) {var temp = a; a = b; b = temp;}
+    while (true) {
+        if (b == 0) return a;
+        a %= b;
+        if (a == 0) return b;
+        b %= a;
+    }
     }
 
 </script>
