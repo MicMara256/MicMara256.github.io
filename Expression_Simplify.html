@@ -563,7 +563,19 @@
     }
     function norm(a,b) {return( a*a + b*b )}
 
-    function add(in1,in2) {//takes the form of ["/",["+",["*ReIm"],["*ReIm"],["*ReIm"]],["*ReIm"]]
-
+    function add(in1,in2) {//takes the form of ["/",["+",["*ReIm"],["*ReIm"],["*ReIm"]],["*ReIm"]] //second one ["/",[*ReIm],[*ReIm]]
+        //get the denominator right
+        var d = in2[2]
+        var PI = in1[2]
+        var denom = ["*ReIm",PI[1]*d[1]-PI[2]*d[2],PI[1]*d[2]+PI[2]*d[1],...PI.slice(3).concat(d.slice(3)).sort()]
+        var SIGMA  = in1[1]
+        var a = in2[1]
+        for(let i = 1 ; i < SIGMA.length; i++) {
+            SIGMA[i] = ["*ReIm",SIGMA[i][1]*d[1]-SIGMA[i][2]*d[2],SIGMA[i][1]*d[2]-SIGMA[i][2]*d[1],...SIGMA[i].slice(3).concat(d.slice(3)).sort()]
+        }
+        //distributed.
+        a = ["*ReIm",a[1]*PI[1]-a[2]*PI[2],a[1]*PI[2]+a[2]*PI[1],...a.slice(3).concat(PI.slice(3).sort)]
+        var num = SIGMA.concat(a)
+        return ["/",num,denom]
     }
 </script>
