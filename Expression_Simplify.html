@@ -461,10 +461,26 @@
                 //terms are now sorted.
             //Put the terms over a common denominator.
                 //look for a common factor among the numerators.
-                var termsgcd = terms
-                for(let i = 0; i < terms[0][1].length; i++) {
-
+                var jmatch;
+                var imatch
+                var gcd = ["*"]
+                for(let i = 3; i < terms[0][1].length; i++) {
+                    imatch = true
+                    //terms[0][1][i] === //Any of anything in the other terms
+                    for(let j = 1; j < terms.length; j++) {
+                        jmatch = false
+                        for(let k = 3; k < terms[j][1].length; k++) {
+                            if(terms[0][1][i] === terms[j][1][k]) {
+                                jmatch = true
+                            }
+                        }
+                        imatch = imatch && jmatch//ensures that if at least one is false, then the entire thing is.
+                    }
+                    if(imatch===true) {
+                        gcd.push(terms[0][1][i])
+                    }
                 }
+                //get the 
         }
     }
     function numberI(inp) {
