@@ -435,7 +435,7 @@
                 }
             }
             var terms = []
-            while(input.includes("+")) {
+            //This used to be a while loop but now its not.
                 //need combine like terms here.
                 // //I COULD do have terms be ["*", #, "i"(if Applicable), ] // sould be ["*", Re, Im...]
                 //fractions will be ["/",["*"...],["*"...]]
@@ -450,7 +450,7 @@
 
                 for(let i = 0; i < terms.length; i++) {
                     for(let j = i+1; j < terms.length; j++) {
-                        if(terms[i].slice(3) === terms[j].slice(3)) {
+                        if(terms[i][1].slice(3) === terms[j][1].slice(3) && terms[i][2].slice(3) === terms[j][2].slice(3)) {
                             terms[i][1] += terms[j][1]
                             terms[i][2] += terms[j][2]
                             terms.splice(j,1)
@@ -459,7 +459,12 @@
                     }
                 }
                 //terms are now sorted.
-            }
+            //Put the terms over a common denominator.
+                //look for a common factor among the numerators.
+                var termsgcd = terms
+                for(let i = 0; i < terms[0][1].length; i++) {
+
+                }
         }
     }
     function numberI(inp) {
@@ -536,15 +541,29 @@
         gcd(a,gcd(b,c))
     }
     function gcd(a,b) {
-    a = Math.abs(a);
-    b = Math.abs(b);
-    if (b > a) {var temp = a; a = b; b = temp;}
-    while (true) {
-        if (b == 0) return a;
-        a %= b;
-        if (a == 0) return b;
-        b %= a;
+        a = Math.abs(a);
+        b = Math.abs(b);
+        if (b > a) {var temp = a; a = b; b = temp;}
+        while (true) {
+            if (b == 0) return a;
+            a %= b;
+            if (a == 0) return b;
+            b %= a;
+        }
     }
+    function gcdexp(a,b) { //gcd for two monomials that have been StarReImed.
+        output = []
+
     }
 
+    function complexGCD(a,b,c,d) {
+        if(norm(c,d)>norm(a,b)){return complexGCD(c,d,a,d)}
+        var q = [a*c-d*b,b*c-a*d,norm(c,d)]
+        q = [round(q[0]/q[2]),round(q[1]/q[2])]
+        var r;
+        r=[a-q[0]*c-q[1]*d,  b+q[0]*d+q[1]*c]
+        if(r[0]===0&&r[1]===0) {return [c,d]}
+        else {return gcd(c,d,r[0],r[1])}
+    }
+    function norm(a,b) {return( a*a + b*b )}
 </script>
