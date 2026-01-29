@@ -460,7 +460,40 @@
                 }
                 //terms are now sorted.
             //Put the terms over a common denominator.
-                //Multiply them all by each other.
+                //add funciton
+                terms[0][1]=["+",terms[0][1]]
+                while(terms.length!=1) {
+                    terms[0] = add(terms[0],terms[1])
+                    terms.splice(1,1)
+                }
+            //Need to do CLT, but 
+            var output = ["("]
+            for(let i = 1; i < terms[1].length; i++) {
+                output.push("(")
+                output.push(terms[1][i][1])
+                output.push(" + ")
+                output.push(terms[1][i][2])
+                output.push("i")
+                output.push(")")
+
+                for(let j = 3; j < terms[1][i].length; j++) {
+                    output.push(terms[1][i][j])
+                }
+                output.push(" + ")
+            }
+            output.push(")/")
+            output.push("(")
+            output.push(terms[2][1])
+            output.push(" + ")
+            output.push(terms[2][2])
+            output.push("i")
+            output.push(")")
+
+            for(let i = 3; i < terms[2].length; i++) {
+                terms[2][i]
+            }
+            output.push(")")
+            return output;
         }
     }
     function numberI(inp) {
