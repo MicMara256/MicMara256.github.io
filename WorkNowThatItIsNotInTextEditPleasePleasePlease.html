@@ -22,6 +22,10 @@
         let skip = false
         let big = false;
         var inArray = Array.from(input)
+        while(inArray[0]==="0") {
+          inArray.shift()
+        }
+        input = inArray.join("")
         if(a==1){output = []; one = true; skip = true;} //exceptions
         //if(!(typeof(a)==="number")) { //exceptions - The first thing people will do is enter this
         //  output = [];
